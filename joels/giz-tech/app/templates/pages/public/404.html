@@ -1,0 +1,29 @@
+<!-- app/templates/pages/public/404.html -->
+{% extends "base/base-public.html" %}
+
+{% block title %}Page Not Found - GIZ-tech{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    <div class="error-content glass-effect">
+        <div class="error-icon">
+            <i class="fas fa-compass"></i>
+        </div>
+        <h1 class="error-code">404</h1>
+        <h2 class="error-title">Page Not Found</h2>
+        <p class="error-message">
+            The page you're looking for doesn't exist or has been moved.
+        </p>
+        <div class="error-actions">
+            <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+                <i class="fas fa-home"></i>
+                Go Home
+            </a>
+            <a href="{{ url_for('main.products') }}" class="btn btn-outline">
+                <i class="fas fa-box"></i>
+                Browse Products
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

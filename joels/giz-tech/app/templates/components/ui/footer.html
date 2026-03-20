@@ -1,0 +1,377 @@
+<footer class="footer">
+    <div class="footer-container">
+        <!-- Top Row - Logo and Links Side by Side -->
+        <div class="footer-top">
+            <div class="footer-brand">
+                <div class="footer-logo">GIZ<span class="logo-accent">-tech</span></div>
+                <p class="footer-tagline">Premium tech products for the modern world</p>
+            </div>
+
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="{{ url_for('main.index') }}"><i class="fas fa-chevron-right"></i> Home</a></li>
+                        <li><a href="{{ url_for('main.products') }}"><i class="fas fa-chevron-right"></i> Products</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> About Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> FAQ</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Shipping Info</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Returns Policy</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Contact</h4>
+                    <ul>
+                        {% if business and business.whatsapp %}
+                        <li><a href="https://wa.me/{{ business.whatsapp }}" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a></li>
+                        {% endif %}
+                        {% if business and business.email %}
+                        <li><a href="mailto:{{ business.email }}"><i class="far fa-envelope"></i> Email</a></li>
+                        {% endif %}
+                        <li><a href="#"><i class="fas fa-map-marker-alt"></i> Malawi</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row - Copyright and Social Icons -->
+        <div class="footer-bottom">
+            <p>&copy; 2024 GIZ-tech. All rights reserved. | Made with <i class="fas fa-heart" style="color: #ef4444; font-size: 0.7rem;"></i> in Malawi</p>
+            <div class="footer-social">
+                <a href="#" class="social-icon" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="social-icon" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="social-icon" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                {% if business and business.whatsapp %}
+                <a href="https://wa.me/{{ business.whatsapp }}" class="social-icon" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</footer>
+
+<style>
+/* ===== FOOTER - PROFESSIONAL POLISH ===== */
+.footer {
+    background: linear-gradient(135deg, #0a0a0a 0%, #0f0f1a 100%);
+    border-top: 1px solid rgba(37, 99, 235, 0.2);
+    padding: 3rem 0 1.5rem;
+    margin-top: 4rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #2563eb, #3b82f6, #2563eb, transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Top Row - Logo and Links Horizontal */
+.footer-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.5s ease;
+}
+
+.footer-brand {
+    flex-shrink: 0;
+    min-width: 200px;
+    transition: transform 0.3s ease;
+}
+
+.footer-brand:hover {
+    transform: translateY(-2px);
+}
+
+.footer-logo {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff, #2563eb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+}
+
+.logo-accent {
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.footer-tagline {
+    color: #888;
+    font-size: 0.85rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Footer Links - Horizontal */
+.footer-links {
+    display: flex;
+    gap: 4rem;
+    flex-wrap: wrap;
+}
+
+.footer-column {
+    animation: fadeInUp 0.5s ease backwards;
+}
+
+.footer-column:nth-child(1) { animation-delay: 0.1s; }
+.footer-column:nth-child(2) { animation-delay: 0.2s; }
+.footer-column:nth-child(3) { animation-delay: 0.3s; }
+
+.footer-column h4 {
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    letter-spacing: 0.5px;
+    position: relative;
+    display: inline-block;
+}
+
+.footer-column h4::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: linear-gradient(90deg, #2563eb, #3b82f6);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.footer-column:hover h4::after {
+    width: 50px;
+}
+
+.footer-column ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-column li {
+    margin-bottom: 0.6rem;
+}
+
+.footer-column a {
+    color: #888;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.footer-column a i {
+    font-size: 0.7rem;
+    width: 16px;
+    transition: transform 0.2s ease;
+}
+
+.footer-column a:hover {
+    color: #2563eb;
+    transform: translateX(4px);
+}
+
+.footer-column a:hover i {
+    transform: translateX(3px);
+}
+
+/* Footer Bottom */
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    animation: fadeInUp 0.5s ease 0.4s both;
+}
+
+.footer-bottom p {
+    color: #666;
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+.footer-bottom p i {
+    animation: heartbeat 1.5s ease infinite;
+}
+
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+.footer-social {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.social-icon {
+    color: #666;
+    font-size: 0.9rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.03);
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.social-icon::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(37, 99, 235, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+}
+
+.social-icon:hover::before {
+    width: 100%;
+    height: 100%;
+}
+
+.social-icon:hover {
+    color: #2563eb;
+    background: rgba(37, 99, 235, 0.1);
+    transform: translateY(-3px);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .footer {
+        padding: 2rem 0 1rem;
+        margin-top: 2rem;
+    }
+
+    .footer-container {
+        padding: 0 1.5rem;
+    }
+
+    .footer-top {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1.5rem;
+    }
+
+    .footer-brand {
+        text-align: center;
+    }
+
+    .footer-links {
+        justify-content: center;
+        gap: 2rem;
+        width: 100%;
+    }
+
+    .footer-column {
+        text-align: center;
+        flex: 1;
+        min-width: 100px;
+    }
+
+    .footer-column h4::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .footer-column ul {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .footer-column a {
+        justify-content: center;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .footer-bottom p {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-links {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .footer-column {
+        width: 100%;
+    }
+
+    .footer-logo {
+        font-size: 1.5rem;
+    }
+
+    .footer-tagline {
+        font-size: 0.75rem;
+    }
+}
+</style>

@@ -1,0 +1,264 @@
+{% extends "base/base.html" %}
+
+{% block title %}Message Sent - GIZ-tech{% endblock %}
+
+{% block content %}
+<div class="message-confirmation">
+    <div class="confirmation-card">
+        <div class="confirmation-icon success">
+            <i class="fas fa-check-circle"></i>
+        </div>
+
+        <h1 class="confirmation-title">Message Sent Successfully!</h1>
+
+        <p class="confirmation-message">
+            Thank you for reaching out. Your message has been sent to the seller.
+        </p>
+
+        <div class="message-details">
+            <div class="detail-item">
+                <span class="detail-label">Product:</span>
+                <span class="detail-value">{{ product.title }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Sent to:</span>
+                <span class="detail-value">{{ business.email }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">WhatsApp:</span>
+                <span class="detail-value">
+                    <a href="https://wa.me/{{ business.whatsapp }}" target="_blank">+{{ business.whatsapp }}</a>
+                </span>
+            </div>
+        </div>
+
+        <div class="confirmation-actions">
+            <a href="{{ url_for('main.product_detail', slug=product.slug or product.id) }}" class="btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Back to Product
+            </a>
+            <a href="{{ url_for('main.products') }}" class="btn-primary">
+                <i class="fas fa-shopping-bag"></i>
+                Browse More
+            </a>
+        </div>
+
+        <div class="whatsapp-reminder">
+            <i class="fab fa-whatsapp"></i>
+            <p>For faster response, you can also contact directly on WhatsApp</p>
+            <a href="https://wa.me/{{ business.whatsapp }}?text=Hi%2C%20I%20just%20sent%20a%20message%20about%20{{ product.title|urlencode }}"
+               target="_blank"
+               class="whatsapp-link">
+                Chat on WhatsApp
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.message-confirmation {
+    min-height: calc(100vh - 200px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    margin-top: 80px;
+}
+
+.confirmation-card {
+    max-width: 550px;
+    width: 100%;
+    background: rgba(20, 20, 30, 0.4);
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    padding: 2.5rem;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: fadeInUp 0.6s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.confirmation-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2.5rem;
+}
+
+.confirmation-icon.success {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 2px solid #10b981;
+}
+
+.confirmation-icon.error {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 2px solid #ef4444;
+}
+
+.confirmation-title {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: white;
+}
+
+.confirmation-message {
+    color: #a0a0a0;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.message-details {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    color: #888;
+    font-weight: 500;
+}
+
+.detail-value {
+    color: white;
+    font-weight: 500;
+}
+
+.detail-value a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.detail-value a:hover {
+    text-decoration: underline;
+}
+
+.confirmation-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.btn-primary, .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.whatsapp-reminder {
+    background: rgba(37, 211, 102, 0.1);
+    border-radius: 16px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    border: 1px solid rgba(37, 211, 102, 0.3);
+}
+
+.whatsapp-reminder i {
+    font-size: 1.5rem;
+    color: #25D366;
+}
+
+.whatsapp-reminder p {
+    color: #a0a0a0;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.whatsapp-link {
+    background: #25D366;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.whatsapp-link:hover {
+    background: #20bd5a;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .confirmation-card {
+        padding: 1.5rem;
+    }
+
+    .confirmation-title {
+        font-size: 1.5rem;
+    }
+
+    .confirmation-actions {
+        flex-direction: column;
+    }
+
+    .btn-primary, .btn-secondary {
+        justify-content: center;
+    }
+
+    .whatsapp-reminder {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+</style>
+{% endblock %}

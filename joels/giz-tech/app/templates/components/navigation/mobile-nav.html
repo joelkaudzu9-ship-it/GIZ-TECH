@@ -1,0 +1,452 @@
+<nav class="navbar" id="mainNav">
+    <div class="nav-container">
+        <a href="{{ url_for('main.index') }}" class="logo">
+            <span class="logo-text">GIZ<span class="text-accent">-tech</span></span>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <ul class="nav-menu-desktop">
+            <li><a href="{{ url_for('main.index') }}" class="nav-link">Home</a></li>
+            <li><a href="{{ url_for('main.products') }}" class="nav-link">Products</a></li>
+            {% if session.get('owner_logged_in') or current_user.is_authenticated %}
+            <li><a href="{{ url_for('dashboard.overview') }}" class="nav-link">Dashboard</a></li>
+            <li><a href="{{ url_for('auth.logout') }}" class="nav-link">Logout</a></li>
+            {% else %}
+            <li><a href="{{ url_for('auth.login') }}" class="nav-link">Login</a></li>
+            {% endif %}
+        </ul>
+
+        <!-- Search Bar (Desktop only) -->
+        <div class="search-container desktop-only">
+            <input type="text"
+                   id="searchInput"
+                   placeholder="Search products..."
+                   class="search-input"
+                   autocomplete="off">
+            <div id="searchResults" class="search-results hidden"></div>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+
+    <!-- Mobile Navigation - Slide from Right (CRISP VERSION) -->
+    <div class="nav-menu-mobile" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <span class="mobile-menu-title">Menu</span>
+            <button class="mobile-menu-close" id="mobileMenuClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <ul class="mobile-menu-list">
+            <li><a href="{{ url_for('main.index') }}" class="mobile-nav-link">Home</a></li>
+            <li><a href="{{ url_for('main.products') }}" class="mobile-nav-link">Products</a></li>
+            <li class="mobile-search-item">
+                <i class="fas fa-search"></i>
+                <input type="text"
+                       id="mobileSearchInput"
+                       placeholder="Search products..."
+                       class="mobile-search-input">
+            </li>
+            {% if session.get('owner_logged_in') or current_user.is_authenticated %}
+            <li><a href="{{ url_for('dashboard.overview') }}" class="mobile-nav-link">Dashboard</a></li>
+            <li><a href="{{ url_for('auth.logout') }}" class="mobile-nav-link">Logout</a></li>
+            {% else %}
+            <li><a href="{{ url_for('auth.login') }}" class="mobile-nav-link">Login</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+
+<!-- Overlay -->
+<div class="menu-overlay" id="menuOverlay"></div>
+
+<style>
+/* ===== NAVBAR BASE ===== */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    z-index: 1000;
+    padding: 0.8rem 2rem;
+    transition: all 0.3s ease;
+}
+
+.navbar.scrolled {
+    padding: 0.5rem 2rem;
+    background: rgba(5, 5, 5, 0.98);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.nav-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ===== LOGO ===== */
+.logo {
+    text-decoration: none;
+    z-index: 1002;
+}
+
+.logo-text {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff, var(--accent-primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ===== DESKTOP MENU ===== */
+.nav-menu-desktop {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-link {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 0.5rem 0;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+/* ===== DESKTOP SEARCH ===== */
+.search-container {
+    position: relative;
+    width: 300px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.6rem 1rem 0.6rem 2.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50px;
+    color: #ffffff;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.search-container::before {
+    content: '\f002';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a0a0a0;
+    z-index: 1;
+}
+
+/* ===== MOBILE MENU BUTTON ===== */
+.mobile-menu-btn {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 21px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1002;
+}
+
+.mobile-menu-btn span {
+    width: 100%;
+    height: 3px;
+    background: #ffffff;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-btn.active span:nth-child(1) {
+    transform: translateY(9px) rotate(45deg);
+}
+
+.mobile-menu-btn.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.mobile-menu-btn.active span:nth-child(3) {
+    transform: translateY(-9px) rotate(-45deg);
+}
+
+/* ===== MOBILE MENU - CRISP VERSION ===== */
+.nav-menu-mobile {
+    display: block;
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 85%;
+    max-width: 350px;
+    height: 100vh;
+    background: #0a0a0a;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    transition: right 0.3s ease;
+    z-index: 1001;
+    overflow-y: auto;
+    padding: 2rem 1.5rem;
+    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.nav-menu-mobile.active {
+    right: 0;
+}
+
+.mobile-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-menu-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+.mobile-menu-close {
+    background: none;
+    border: none;
+    color: #a0a0a0;
+    font-size: 1.5rem;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-close:hover {
+    color: #ef4444;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.mobile-menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mobile-menu-list li {
+    margin-bottom: 0.75rem;
+    opacity: 1;
+    transform: none;
+}
+
+.mobile-nav-link {
+    display: block;
+    padding: 1rem 1.5rem;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 500;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    transition: all 0.3s ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: 0.3px;
+}
+
+.mobile-nav-link:hover {
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--accent-primary);
+    transform: translateX(5px);
+}
+
+.mobile-search-item {
+    position: relative;
+    margin: 1.5rem 0;
+}
+
+.mobile-search-item i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a0a0a0;
+    z-index: 1;
+    font-size: 1rem;
+}
+
+.mobile-search-input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.mobile-search-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.mobile-search-input::placeholder {
+    color: #a0a0a0;
+    opacity: 1;
+}
+
+/* ===== OVERLAY ===== */
+.menu-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+}
+
+.menu-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0.8rem 1rem;
+    }
+
+    .nav-menu-desktop {
+        display: none;
+    }
+
+    .desktop-only {
+        display: none;
+    }
+
+    .mobile-menu-btn {
+        display: flex;
+    }
+
+    .nav-menu-mobile {
+        display: block;
+    }
+}
+
+@media (min-width: 769px) {
+    .nav-menu-mobile {
+        display: none !important;
+    }
+
+    .menu-overlay {
+        display: none !important;
+    }
+}
+
+/* ===== SEARCH RESULTS ===== */
+.search-results {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    right: 0;
+    background: #111111;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1003;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.search-results.hidden {
+    display: none;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    text-decoration: none;
+    color: #ffffff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.3s ease;
+}
+
+.search-result-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.search-result-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.search-result-info h4 {
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+}
+
+.search-result-info p {
+    margin: 0;
+    color: #a0a0a0;
+    font-size: 0.9rem;
+}
+</style>

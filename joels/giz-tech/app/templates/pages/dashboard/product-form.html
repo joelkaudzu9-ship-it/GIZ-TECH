@@ -1,0 +1,292 @@
+{% extends "base/base-dashboard.html" %}
+
+{% block dashboard_title %}{{ title }}{% endblock %}
+{% block dashboard_subtitle %}{{ 'Edit product details' if product else 'Add a new product to your inventory' }}{% endblock %}
+
+{% block dashboard_actions %}
+<a href="{{ url_for('dashboard.products') }}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left"></i>
+    Back to Products
+</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div style="max-width: 900px; margin: 0 auto;">
+    <form method="POST"
+          enctype="multipart/form-data"
+          id="productForm"
+          style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 15px; padding: 2rem;">
+        {{ form.hidden_tag() }}
+
+        <!-- Basic Information -->
+        <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border-subtle);">
+            <h3 style="margin-bottom: 1.5rem; font-size: 1.25rem; color: var(--text-light);">Basic Information</h3>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label for="title" style="display: block; margin-bottom: 0.5rem; color: var(--text-light); font-weight: 500;">
+                    {{ form.title.label.text }} *
+                </label>
+                {{ form.title(class="form-input", placeholder="e.g., iPhone 13 Pro Max", style="width: 100%; padding: 0.75rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light); font-size: 1rem;") }}
+                {% if form.title.errors %}
+                <div style="margin-top: 0.5rem; color: var(--error); font-size: 0.9rem;">
+                    {% for error in form.title.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <label for="price" style="display: block; margin-bottom: 0.5rem; color: var(--text-light); font-weight: 500;">
+                        {{ form.price.label.text }} (MWK) *
+                    </label>
+                    {{ form.price(class="form-input", type="number", step="0.01", placeholder="e.g., 250000", style="width: 100%; padding: 0.75rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light); font-size: 1rem;") }}
+                    {% if form.price.errors %}
+                    <div style="margin-top: 0.5rem; color: var(--error); font-size: 0.9rem;">
+                        {% for error in form.price.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; color: var(--text-light); font-weight: 500;">Status</label>
+                    <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            {{ form.is_featured() }}
+                            <span style="color: var(--text-light);">Feature this product</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label for="description" style="display: block; margin-bottom: 0.5rem; color: var(--text-light); font-weight: 500;">
+                    {{ form.description.label.text }} *
+                </label>
+                {{ form.description(class="form-input", rows="6", placeholder="Detailed description of the product...", style="width: 100%; padding: 0.75rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light); font-size: 1rem; resize: vertical;") }}
+                <small style="display: block; margin-top: 0.25rem; color: var(--text-muted); font-size: 0.8rem;">Supports basic HTML formatting</small>
+                {% if form.description.errors %}
+                <div style="margin-top: 0.5rem; color: var(--error); font-size: 0.9rem;">
+                    {% for error in form.description.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Product Images -->
+        <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border-subtle);">
+            <h3 style="margin-bottom: 1.5rem; font-size: 1.25rem; color: var(--text-light);">Product Images</h3>
+
+            <div class="file-upload-area" id="fileUploadArea" style="position: relative; margin-bottom: 1rem;">
+                <input type="file"
+                       name="images"
+                       id="images"
+                       multiple
+                       accept="image/*"
+                       class="file-input"
+                       style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2;">
+                <div class="file-upload-label" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; padding: 3rem; background: rgba(255,255,255,0.02); border: 2px dashed var(--border-subtle); border-radius: 10px; text-align: center; transition: all 0.3s ease;">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--accent-primary);"></i>
+                    <span style="color: var(--text-light); font-size: 1.1rem;">Click or drag images to upload</span>
+                    <small style="color: var(--text-muted);">PNG, JPG, JPEG, GIF, WEBP (Max 16MB each)</small>
+                </div>
+            </div>
+
+            <!-- Image Preview -->
+            <div id="imagePreview" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                {% if product and product.image_list %}
+                    {% for image in product.image_list %}
+                    <div class="preview-item" style="position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden;">
+                        <img src="{{ image }}" alt="Product image" style="width: 100%; height: 100%; object-fit: cover;">
+                        <button type="button" class="remove-image" data-url="{{ image }}" style="position: absolute; top: 5px; right: 5px; width: 25px; height: 25px; border-radius: 50%; background: var(--error); border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- SEO Settings -->
+        <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border-subtle);">
+            <h3 style="margin-bottom: 1.5rem; font-size: 1.25rem; color: var(--text-light);">SEO Settings (Optional)</h3>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label for="seo_title" style="display: block; margin-bottom: 0.5rem; color: var(--text-light); font-weight: 500;">
+                    {{ form.seo_title.label.text }}
+                </label>
+                {{ form.seo_title(class="form-input", placeholder="Custom SEO title", style="width: 100%; padding: 0.75rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light); font-size: 1rem;") }}
+                <small style="display: block; margin-top: 0.25rem; color: var(--text-muted); font-size: 0.8rem;">Leave empty to use product title</small>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label for="seo_description" style="display: block; margin-bottom: 0.5rem; color: var(--text-light); font-weight: 500;">
+                    {{ form.seo_description.label.text }}
+                </label>
+                {{ form.seo_description(class="form-input", rows="3", placeholder="Custom meta description", style="width: 100%; padding: 0.75rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light); font-size: 1rem; resize: vertical;") }}
+                <small style="display: block; margin-top: 0.25rem; color: var(--text-muted); font-size: 0.8rem;">Leave empty to generate from product description</small>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+            <a href="{{ url_for('dashboard.products') }}" class="btn btn-secondary" style="padding: 0.75rem 1.5rem; background: rgba(255,255,255,0.1); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-times"></i>
+                Cancel
+            </a>
+            <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border: none; border-radius: 8px; color: white; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-save"></i>
+                {% if product %}Update Product{% else %}Add Product{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+.file-upload-area.dragover .file-upload-label {
+    border-color: var(--accent-primary);
+    background: rgba(37, 99, 235, 0.1);
+}
+
+.preview-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 10px;
+    overflow: hidden;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.remove-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: var(--error);
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    opacity: 0;
+}
+
+.preview-item:hover .remove-image {
+    opacity: 1;
+}
+
+.remove-image:hover {
+    transform: scale(1.1);
+    background: #dc2626;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--accent-primary) !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Checkbox styling */
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--accent-primary);
+}
+</style>
+
+<script>
+// File upload drag and drop
+const fileInput = document.getElementById('images');
+const uploadArea = document.getElementById('fileUploadArea');
+const previewContainer = document.getElementById('imagePreview');
+
+if (fileInput && uploadArea) {
+    // Drag and drop effects
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        fileInput.files = e.dataTransfer.files;
+        handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', () => {
+        handleFiles(fileInput.files);
+    });
+}
+
+function handleFiles(files) {
+    Array.from(files).forEach(file => {
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const previewItem = document.createElement('div');
+                previewItem.className = 'preview-item';
+                previewItem.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
+                    <button type="button" class="remove-image" onclick="this.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                previewContainer.appendChild(previewItem);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+// Remove existing images
+document.querySelectorAll('.remove-image[data-url]').forEach(btn => {
+    btn.addEventListener('click', async function() {
+        const imageUrl = this.dataset.url;
+        if (confirm('Remove this image?')) {
+            // TODO: Add API call to delete image
+            this.closest('.preview-item').remove();
+        }
+    });
+});
+
+// Form validation
+document.getElementById('productForm')?.addEventListener('submit', (e) => {
+    const title = document.getElementById('title')?.value.trim();
+    const price = document.getElementById('price')?.value;
+    const description = document.getElementById('description')?.value.trim();
+
+    if (!title || !price || !description) {
+        e.preventDefault();
+        alert('Please fill in all required fields');
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,276 @@
+<!-- app/templates/macros/forms.html -->
+
+{% macro render_field(field, class='', placeholder='', type='text') %}
+<div class="form-group">
+    {{ field.label(class="form-label") }}
+    {% if type == 'textarea' %}
+        {{ field(class="form-input " + class, placeholder=placeholder, rows=5, **kwargs) }}
+    {% elif type == 'file' %}
+        {{ field(class="file-input " + class, accept="image/*", **kwargs) }}
+    {% elif type == 'checkbox' %}
+        <label class="checkbox-label">
+            {{ field(class=class, **kwargs) }}
+            <span>{{ field.label.text }}</span>
+        </label>
+    {% else %}
+        {{ field(class="form-input " + class, type=type, placeholder=placeholder, **kwargs) }}
+    {% endif %}
+
+    {% if field.errors %}
+        <div class="form-error">
+            {% for error in field.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if kwargs.get('help_text') %}
+        <small class="form-hint">{{ kwargs.get('help_text') }}</small>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro render_field_with_icon(field, icon, class='', placeholder='', type='text') %}
+<div class="form-group">
+    {{ field.label(class="form-label") }}
+    <div class="input-with-icon">
+        <i class="fas fa-{{ icon }}"></i>
+        {% if type == 'textarea' %}
+            {{ field(class="form-input " + class, placeholder=placeholder, rows=5, **kwargs) }}
+        {% else %}
+            {{ field(class="form-input " + class, type=type, placeholder=placeholder, **kwargs) }}
+        {% endif %}
+    </div>
+
+    {% if field.errors %}
+        <div class="form-error">
+            {% for error in field.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro render_file_upload(field, label='Upload Files', multiple=false, accept='image/*') %}
+<div class="file-upload-area" id="{{ field.id }}_area">
+    {{ field(class="file-input", multiple=multiple, accept=accept, **kwargs) }}
+    <div class="file-upload-label">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <span>{{ label }}</span>
+        <small>Click or drag files to upload</small>
+    </div>
+</div>
+<div id="{{ field.id }}_preview" class="image-preview-grid"></div>
+
+<script>
+    document.getElementById('{{ field.id }}')?.addEventListener('change', function(e) {
+        const preview = document.getElementById('{{ field.id }}_preview');
+        preview.innerHTML = '';
+
+        Array.from(e.target.files).forEach(file => {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'preview-item';
+                    previewItem.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview">
+                        <button type="button" class="remove-image" onclick="this.parentElement.remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    preview.appendChild(previewItem);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    });
+</script>
+{% endmacro %}
+
+{% macro render_switch(field, label='') %}
+<label class="switch-label">
+    {{ field(class="switch-input", **kwargs) }}
+    <span class="switch-slider"></span>
+    <span class="switch-text">{{ label }}</span>
+</label>
+{% endmacro %}
+
+{% macro render_radio(field) %}
+<div class="radio-group">
+    {% for subfield in field %}
+    <label class="radio-label">
+        {{ subfield }}
+        <span>{{ subfield.label.text }}</span>
+    </label>
+    {% endfor %}
+</div>
+{% endmacro %}
+
+{% macro render_date_picker(field, class='') %}
+<div class="form-group">
+    {{ field.label(class="form-label") }}
+    {{ field(class="form-input datepicker " + class, type="date", **kwargs) }}
+</div>
+{% endmacro %}
+
+{% macro render_select(field, class='') %}
+<div class="form-group">
+    {{ field.label(class="form-label") }}
+    {{ field(class="form-select " + class, **kwargs) }}
+</div>
+{% endmacro %}
+
+{% macro render_form_errors(form) %}
+{% if form.errors %}
+<div class="form-errors alert alert-danger">
+    <h4>Please correct the following errors:</h4>
+    <ul>
+    {% for field, errors in form.errors.items() %}
+        {% for error in errors %}
+        <li>{{ field|title }}: {{ error }}</li>
+        {% endfor %}
+    {% endfor %}
+    </ul>
+</div>
+{% endif %}
+{% endmacro %}
+
+{% macro form_actions(cancel_url='', submit_text='Submit', cancel_text='Cancel') %}
+<div class="form-actions">
+    <button type="submit" class="btn btn-primary btn-large">
+        <i class="fas fa-save"></i>
+        {{ submit_text }}
+    </button>
+    {% if cancel_url %}
+    <a href="{{ cancel_url }}" class="btn btn-secondary btn-large">
+        <i class="fas fa-times"></i>
+        {{ cancel_text }}
+    </a>
+    {% endif %}
+</div>
+{% endmacro %}
+
+<style>
+.input-with-icon {
+    position: relative;
+}
+
+.input-with-icon i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    z-index: 1;
+}
+
+.input-with-icon .form-input {
+    padding-left: 2.5rem;
+}
+
+/* Switch styling */
+.switch-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    position: relative;
+}
+
+.switch-input {
+    height: 0;
+    width: 0;
+    visibility: hidden;
+    position: absolute;
+}
+
+.switch-slider {
+    cursor: pointer;
+    width: 50px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    display: inline-block;
+    border-radius: 100px;
+    position: relative;
+    transition: background 0.3s ease;
+}
+
+.switch-slider:before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: var(--text-light);
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.switch-input:checked + .switch-slider {
+    background: var(--accent-primary);
+}
+
+.switch-input:checked + .switch-slider:before {
+    left: calc(100% - 22px);
+}
+
+/* Radio styling */
+.radio-group {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50px;
+    transition: all 0.3s ease;
+}
+
+.radio-label:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.radio-label input[type="radio"] {
+    accent-color: var(--accent-primary);
+    width: 18px;
+    height: 18px;
+}
+
+/* Form errors */
+.form-errors {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--error);
+    border-radius: 10px;
+    color: var(--error);
+}
+
+.form-errors h4 {
+    margin-bottom: 0.5rem;
+}
+
+.form-errors ul {
+    margin-left: 1.5rem;
+}
+
+/* Datepicker customization */
+.datepicker::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.datepicker::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+</style>

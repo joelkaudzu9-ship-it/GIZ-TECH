@@ -1,0 +1,151 @@
+{% extends "base/base-dashboard.html" %}
+
+{% block dashboard_title %}Dashboard Overview{% endblock %}
+{% block dashboard_subtitle %}Welcome back, {{ business.name if business else 'Admin' }}!{% endblock %}
+
+{% block dashboard_content %}
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="stat-content">
+            <span class="stat-label">Total Revenue</span>
+            <span class="stat-value">MWK {{ "{:,.0f}".format(total_revenue|default(0)) }}</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-eye"></i>
+        </div>
+        <div class="stat-content">
+            <span class="stat-label">Total Views</span>
+            <span class="stat-value">{{ "{:,.0f}".format(total_views|default(0)) }}</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-content">
+            <span class="stat-label">Items Sold</span>
+            <span class="stat-value">{{ "{:,.0f}".format(sold_count|default(0)) }}</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-envelope"></i>
+        </div>
+        <div class="stat-content">
+            <span class="stat-label">Messages</span>
+            <span class="stat-value">{{ "{:,.0f}".format(message_count|default(0)) }}</span>
+            {% if unread_messages > 0 %}
+            <span style="color: var(--error); font-size: 0.85rem; margin-top: 0.25rem; display: block;">
+                {{ unread_messages }} unread
+            </span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Charts Grid -->
+<div class="charts-grid">
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3>Sales Trend (Last 7 Days)</h3>
+        </div>
+        <div style="height: 300px; display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+            <i class="fas fa-chart-line" style="font-size: 3rem; opacity: 0.3; margin-right: 1rem;"></i>
+            <span>Chart will appear here</span>
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3>Popular Products</h3>
+        </div>
+        <div class="popular-products-list">
+            {% if popular_products %}
+                {% for product in popular_products %}
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 0.5rem;">
+                    <div>
+                        <div style="font-weight: 500;">{{ product.title }}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">{{ product.views }} views</div>
+                    </div>
+                    <span class="status-badge {% if product.is_sold %}sold{% endif %}">
+                        {{ 'Sold' if product.is_sold else 'Available' }}
+                    </span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                    No products yet
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="recent-section">
+    <div class="section-header">
+        <h3>Recent Activity</h3>
+        <a href="{{ url_for('dashboard.analytics') }}" class="view-all">View All</a>
+    </div>
+
+    <div class="activity-timeline">
+        {% if recent_activity %}
+            {% for activity in recent_activity %}
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-{% if activity.action == 'view' %}eye{% elif activity.action == 'message' %}envelope{% elif activity.action == 'add_product' %}plus{% else %}clock{% endif %}"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-text">
+                        {% if activity.action == 'view' %}
+                            Product viewed
+                        {% elif activity.action == 'message' %}
+                            New message received
+                        {% elif activity.action == 'add_product' %}
+                            New product added
+                        {% elif activity.action == 'sold' %}
+                            Product marked as sold
+                        {% else %}
+                            {{ activity.action }}
+                        {% endif %}
+                    </div>
+                    <div class="activity-time">{{ activity.created_at|time_ago if activity.created_at else 'Just now' }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                No recent activity
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="quick-actions">
+    <a href="{{ url_for('dashboard.add_product') }}" class="quick-action-card">
+        <i class="fas fa-plus-circle"></i>
+        <span>Add Product</span>
+    </a>
+    <a href="{{ url_for('dashboard.messages') }}" class="quick-action-card">
+        <i class="fas fa-envelope"></i>
+        <span>View Messages</span>
+        {% if unread_messages > 0 %}
+        <span class="badge">{{ unread_messages }}</span>
+        {% endif %}
+    </a>
+    <a href="{{ url_for('dashboard.settings') }}" class="quick-action-card">
+        <i class="fas fa-cog"></i>
+        <span>Settings</span>
+    </a>
+</div>
+{% endblock %}

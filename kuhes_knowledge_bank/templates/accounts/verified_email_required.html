@@ -1,0 +1,38 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Verify Your Email Address" %}{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 4rem auto;">
+    <div class="card" style="padding: 2rem; text-align: center;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">📨</div>
+        <h2 style="margin-bottom: 1rem;">{% trans "Verify Your Email Address" %}</h2>
+
+        <div style="background: var(--warning-light); border: 1px solid var(--warning); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 2rem;">
+            <p style="color: var(--warning-dark); margin: 0;">
+                {% blocktrans %}This page requires a verified email address.{% endblocktrans %}
+            </p>
+        </div>
+
+        <p style="color: var(--gray-600); margin-bottom: 1.5rem;">
+            {% blocktrans %}We have sent an email to <strong>{{ request.user.email }}</strong> for verification.{% endblocktrans %}
+        </p>
+
+        <p style="color: var(--gray-600); margin-bottom: 2rem;">
+            {% blocktrans %}Click the link in the email to complete the verification process.{% endblocktrans %}
+        </p>
+
+        <div style="background: var(--gray-50); padding: 1.5rem; border-radius: var(--radius-md);">
+            <p style="margin-bottom: 1rem; font-weight: 500;">{% trans "Didn't receive the email?" %}</p>
+
+            <form method="post" action="{% url 'account_email' %}">
+                {% csrf_token %}
+                <button type="submit" name="action_send" class="btn btn-primary" style="width: 100%;">
+                    {% trans "Resend Verification Email" %}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

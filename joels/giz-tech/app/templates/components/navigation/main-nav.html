@@ -1,0 +1,207 @@
+<nav style="position: fixed; top: 0; left: 0; right: 0; background: #0a0a0a; border-bottom: 1px solid #222; z-index: 1000; padding: 1rem 2rem;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
+        <a href="{{ url_for('main.index') }}" style="font-size: 1.5rem; font-weight: bold; color: white; text-decoration: none;">GIZ-tech</a>
+
+        <!-- Desktop Menu -->
+        <div class="desktop-menu" style="display: flex; gap: 2rem;">
+            <a href="{{ url_for('main.index') }}" class="nav-link-desktop" style="color: white; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='#2563eb'" onmouseout="this.style.color='white'">Home</a>
+            <a href="{{ url_for('main.products') }}" class="nav-link-desktop" style="color: white; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='#2563eb'" onmouseout="this.style.color='white'">Products</a>
+            {% if session.get('owner_logged_in') or current_user.is_authenticated %}
+            <a href="{{ url_for('dashboard.overview') }}" class="nav-link-desktop" style="color: white; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='#2563eb'" onmouseout="this.style.color='white'">Dashboard</a>
+            <a href="{{ url_for('auth.logout') }}" class="nav-link-desktop" style="color: white; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='white'">Logout</a>
+            {% else %}
+            <a href="{{ url_for('auth.login') }}" class="nav-link-desktop" style="color: white; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='#2563eb'" onmouseout="this.style.color='white'">Login</a>
+            {% endif %}
+        </div>
+
+        <!-- Desktop Search -->
+        <div class="desktop-search" style="position: relative;">
+            <input type="text" id="searchInput" placeholder="Search products..." style="padding: 0.5rem 1rem; border-radius: 20px; border: 1px solid #333; background: #1a1a1a; color: white; width: 250px; transition: all 0.3s;">
+            <div id="searchResults" style="position: absolute; top: 100%; left: 0; right: 0; background: #1a1a1a; border-radius: 8px; margin-top: 5px; display: none; z-index: 1002; max-height: 400px; overflow-y: auto;"></div>
+        </div>
+
+        <!-- Hamburger -->
+        <button id="hamburgerBtn" style="display: none; font-size: 1.8rem; background: none; border: none; color: white; cursor: pointer; padding: 0 0.5rem;">☰</button>
+    </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div id="mobileMenu" style="position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #0a0a0a; border-left: 1px solid #222; padding: 4rem 1.5rem 2rem; display: flex; flex-direction: column; gap: 1rem; transition: right 0.3s ease; z-index: 1001;">
+    <button id="closeMenuBtn" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 1.8rem; cursor: pointer; transition: color 0.3s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='white'">✕</button>
+    <a href="{{ url_for('main.index') }}" style="color: white; text-decoration: none; padding: 1rem; text-align: center; background: #1a1a1a; border-radius: 8px; transition: all 0.3s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#1a1a1a'">Home</a>
+    <a href="{{ url_for('main.products') }}" style="color: white; text-decoration: none; padding: 1rem; text-align: center; background: #1a1a1a; border-radius: 8px; transition: all 0.3s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#1a1a1a'">Products</a>
+    <input type="text" id="mobileSearchInput" placeholder="Search products..." style="padding: 1rem; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: white; text-align: center;">
+    <div id="mobileSearchResults" style="display: none; background: #1a1a1a; border-radius: 8px; margin-top: 5px; max-height: 300px; overflow-y: auto;"></div>
+    {% if session.get('owner_logged_in') or current_user.is_authenticated %}
+    <a href="{{ url_for('dashboard.overview') }}" style="color: white; text-decoration: none; padding: 1rem; text-align: center; background: #1a1a1a; border-radius: 8px; transition: all 0.3s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#1a1a1a'">Dashboard</a>
+    <a href="{{ url_for('auth.logout') }}" style="color: white; text-decoration: none; padding: 1rem; text-align: center; background: #1a1a1a; border-radius: 8px; transition: all 0.3s;" onmouseover="this.style.background='#ef4444'" onmouseout="this.style.background='#1a1a1a'">Logout</a>
+    {% else %}
+    <a href="{{ url_for('auth.login') }}" style="color: white; text-decoration: none; padding: 1rem; text-align: center; background: #1a1a1a; border-radius: 8px; transition: all 0.3s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#1a1a1a'">Login</a>
+    {% endif %}
+</div>
+
+<div id="menuOverlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: none; cursor: pointer;"></div>
+
+<script>
+(function() {
+    // Mobile menu toggle
+    const hamburger = document.getElementById('hamburgerBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const closeBtn = document.getElementById('closeMenuBtn');
+    const overlay = document.getElementById('menuOverlay');
+
+    function openMenu() {
+        mobileMenu.style.right = '0';
+        overlay.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeMenu() {
+        mobileMenu.style.right = '-100%';
+        overlay.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    if (hamburger) hamburger.onclick = openMenu;
+    if (closeBtn) closeBtn.onclick = closeMenu;
+    if (overlay) overlay.onclick = closeMenu;
+
+    document.querySelectorAll('#mobileMenu a').forEach(link => {
+        link.onclick = closeMenu;
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeMenu();
+    });
+
+    // Responsive menu
+    function checkScreenSize() {
+        const isMobile = window.innerWidth <= 768;
+        const desktopMenu = document.querySelector('.desktop-menu');
+        const desktopSearch = document.querySelector('.desktop-search');
+
+        if (isMobile) {
+            if (hamburger) hamburger.style.display = 'block';
+            if (desktopMenu) desktopMenu.style.display = 'none';
+            if (desktopSearch) desktopSearch.style.display = 'none';
+        } else {
+            if (hamburger) hamburger.style.display = 'none';
+            if (desktopMenu) desktopMenu.style.display = 'flex';
+            if (desktopSearch) desktopSearch.style.display = 'block';
+            closeMenu();
+        }
+    }
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+
+    // Search functionality
+    let searchTimeout;
+    const searchInput = document.getElementById('searchInput');
+    const mobileSearch = document.getElementById('mobileSearchInput');
+    const searchResults = document.getElementById('searchResults');
+    const mobileSearchResults = document.getElementById('mobileSearchResults');
+
+    function performSearch(query, resultsContainer) {
+        if (query.length < 2) {
+            if (resultsContainer) resultsContainer.style.display = 'none';
+            return;
+        }
+
+        fetch(`/api/search?q=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.results && data.results.length > 0) {
+                    resultsContainer.innerHTML = data.results.map(item => `
+                        <a href="/product/${item.slug || item.id}" style="display: block; padding: 10px; color: white; text-decoration: none; border-bottom: 1px solid #333; transition: background 0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='transparent'">
+                            <div style="font-weight: bold;">${escapeHtml(item.title)}</div>
+                            <div style="font-size: 0.8rem; color: #888;">MWK ${item.price.toLocaleString()}</div>
+                        </a>
+                    `).join('');
+                    resultsContainer.style.display = 'block';
+                } else {
+                    resultsContainer.innerHTML = '<div style="padding: 10px; color: #888; text-align: center;">No products found</div>';
+                    resultsContainer.style.display = 'block';
+                }
+            })
+            .catch(() => {
+                resultsContainer.innerHTML = '<div style="padding: 10px; color: #888; text-align: center;">Search error</div>';
+                resultsContainer.style.display = 'block';
+            });
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    if (searchInput && searchResults) {
+        searchInput.addEventListener('input', function(e) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                performSearch(e.target.value, searchResults);
+            }, 300);
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+    }
+
+    if (mobileSearch && mobileSearchResults) {
+        mobileSearch.addEventListener('input', function(e) {
+            performSearch(e.target.value, mobileSearchResults);
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!mobileSearch.contains(e.target) && !mobileSearchResults.contains(e.target)) {
+                mobileSearchResults.style.display = 'none';
+            }
+        });
+    }
+
+    // Set active link based on current URL
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.nav-link-desktop, #mobileMenu a').forEach(link => {
+        const href = link.getAttribute('href');
+        if (href && href !== '#' && currentPath === href) {
+            link.style.color = '#2563eb';
+            if (link.classList && link.classList.contains('nav-link-desktop')) {
+                link.style.borderBottom = '2px solid #2563eb';
+            }
+            if (link.parentElement && link.parentElement.id === 'mobileMenu') {
+                link.style.background = '#2563eb';
+            }
+        }
+    });
+})();
+</script>
+
+<style>
+/* Scrollbar styling */
+#searchResults::-webkit-scrollbar, #mobileSearchResults::-webkit-scrollbar {
+    width: 6px;
+}
+#searchResults::-webkit-scrollbar-track, #mobileSearchResults::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+#searchResults::-webkit-scrollbar-thumb, #mobileSearchResults::-webkit-scrollbar-thumb {
+    background: #2563eb;
+    border-radius: 3px;
+}
+
+/* Focus styles */
+input:focus {
+    outline: none;
+    border-color: #2563eb !important;
+}
+
+/* Mobile menu scroll */
+#mobileMenu {
+    scrollbar-width: thin;
+    scrollbar-color: #2563eb #1a1a1a;
+}
+</style>

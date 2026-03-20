@@ -1,0 +1,40 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% load account %}
+
+{% block head_title %}{% trans "Confirm Email Address" %}{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 4rem auto;">
+    <div class="card" style="padding: 2rem; text-align: center;">
+        {% if confirmation %}
+            <div style="font-size: 4rem; margin-bottom: 1rem;">📧</div>
+            <h2 style="margin-bottom: 1rem;">{% trans "Confirm Email Address" %}</h2>
+
+            <p style="color: var(--gray-600); margin-bottom: 2rem;">
+                {% blocktrans with confirmation.email_address.email as email %}
+                Please confirm that <strong>{{ email }}</strong> is your email address.
+                {% endblocktrans %}
+            </p>
+
+            <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary" style="min-width: 200px; padding: 0.75rem;">
+                    {% trans "Confirm" %}
+                </button>
+            </form>
+        {% else %}
+            <div style="font-size: 4rem; margin-bottom: 1rem;">❌</div>
+            <h2 style="margin-bottom: 1rem;">{% trans "Invalid Link" %}</h2>
+
+            <p style="color: var(--gray-600); margin-bottom: 2rem;">
+                {% blocktrans %}This email confirmation link is invalid or has expired.{% endblocktrans %}
+            </p>
+
+            <a href="{% url 'account_email' %}" class="btn btn-primary">
+                {% trans "Request New Link" %}
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

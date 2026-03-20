@@ -1,0 +1,304 @@
+<!-- app/templates/pages/dashboard/messages.html -->
+{% extends "base/base-dashboard.html" %}
+
+{% block dashboard_title %}Messages{% endblock %}
+{% block dashboard_subtitle %}Manage customer inquiries{% endblock %}
+
+{% block dashboard_content %}
+<!-- Filters -->
+<div class="message-filters">
+    <div class="filter-tabs">
+        <a href="{{ url_for('dashboard.messages') }}"
+           class="filter-tab {% if filter_type == 'all' %}active{% endif %}">
+            All Messages
+        </a>
+        <a href="{{ url_for('dashboard.messages', filter='unread') }}"
+           class="filter-tab {% if filter_type == 'unread' %}active{% endif %}">
+            Unread
+            {% if unread_count %}
+            <span class="badge">{{ unread_count }}</span>
+            {% endif %}
+        </a>
+        <a href="{{ url_for('dashboard.messages', filter='read') }}"
+           class="filter-tab {% if filter_type == 'read' %}active{% endif %}">
+            Read
+        </a>
+    </div>
+
+    <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text"
+               id="messageSearch"
+               placeholder="Search messages..."
+               class="search-input">
+    </div>
+</div>
+
+<!-- Messages List -->
+<div class="messages-container">
+    {% if messages %}
+        {% for message in messages %}
+        <div class="message-card glass-effect {% if not message.is_read %}unread{% endif %}"
+             data-message-id="{{ message.id }}">
+            <div class="message-header">
+                <div class="message-sender">
+                    <div class="sender-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="sender-info">
+                        <h4>{{ message.name }}</h4>
+                        <a href="mailto:{{ message.email }}">{{ message.email }}</a>
+                    </div>
+                </div>
+                <div class="message-meta">
+                    <span class="message-date">{{ message.created_at|time_ago }}</span>
+                    <div class="message-actions">
+                        {% if not message.is_read %}
+                        <button class="action-btn mark-read"
+                                data-message-id="{{ message.id }}"
+                                title="Mark as read">
+                            <i class="fas fa-envelope-open"></i>
+                        </button>
+                        {% endif %}
+                        <button class="action-btn delete-message"
+                                data-message-id="{{ message.id }}"
+                                title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="message-product">
+                <i class="fas fa-box"></i>
+                <span>Re: <a href="{{ url_for('main.product_detail', slug=message.product.slug or message.product.id) }}" target="_blank">
+                    {{ message.product.title }}
+                </a></span>
+            </div>
+
+            <div class="message-body">
+                {{ message.message|nl2br }}
+            </div>
+
+            <div class="message-footer">
+                <button class="btn btn-sm btn-outline reply-message"
+                        data-email="{{ message.email }}"
+                        data-name="{{ message.name }}">
+                    <i class="fas fa-reply"></i> Reply
+                </button>
+                <button class="btn btn-sm btn-outline view-product"
+                        data-product-id="{{ message.product.id }}">
+                    <i class="fas fa-eye"></i> View Product
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-envelope-open"></i>
+            <h3>No Messages Yet</h3>
+            <p>When customers contact you, their messages will appear here</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Pagination -->
+{% if pagination and pagination.pages > 1 %}
+<div class="pagination">
+    {% if pagination.has_prev %}
+    <a href="{{ url_for('dashboard.messages', page=pagination.prev_num, filter=filter_type) }}"
+       class="page-link">
+        <i class="fas fa-chevron-left"></i>
+    </a>
+    {% endif %}
+
+    {% for page in pagination.iter_pages() %}
+        {% if page %}
+            <a href="{{ url_for('dashboard.messages', page=page, filter=filter_type) }}"
+               class="page-link {% if page == pagination.page %}active{% endif %}">
+                {{ page }}
+            </a>
+        {% else %}
+            <span class="page-dots">...</span>
+        {% endif %}
+    {% endfor %}
+
+    {% if pagination.has_next %}
+    <a href="{{ url_for('dashboard.messages', page=pagination.next_num, filter=filter_type) }}"
+       class="page-link">
+        <i class="fas fa-chevron-right"></i>
+    </a>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Reply Modal -->
+<div id="replyModal" class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-container glass-effect">
+        <div class="modal-header">
+            <h3>Reply to <span id="replyName"></span></h3>
+            <button class="modal-close" onclick="closeModal('replyModal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form id="replyForm" class="modal-form" action="#" method="post">
+            <div class="form-group">
+                <label for="replyTo">To</label>
+                <input type="email" id="replyTo" class="form-input" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="replySubject">Subject</label>
+                <input type="text" id="replySubject" class="form-input" value="Re: Your inquiry about GIZ-tech products">
+            </div>
+
+            <div class="form-group">
+                <label for="replyMessage">Message</label>
+                <textarea id="replyMessage" class="form-input" rows="6" required></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('replyModal')">
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-primary" id="sendReply">
+                    <i class="fas fa-paper-plane"></i> Send Reply
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Search messages
+    document.getElementById('messageSearch')?.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const messages = document.querySelectorAll('.message-card');
+
+        messages.forEach(message => {
+            const text = message.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                message.style.display = '';
+            } else {
+                message.style.display = 'none';
+            }
+        });
+    });
+
+    // Mark as read
+    document.querySelectorAll('.mark-read').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const messageId = this.dataset.messageId;
+            const messageCard = this.closest('.message-card');
+
+            try {
+                const response = await fetch(`/dashboard/messages/mark-read/${messageId}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    messageCard.classList.remove('unread');
+                    this.remove(); // Remove the mark-read button
+                    showToast('Message marked as read', 'success');
+                }
+            } catch (error) {
+                showToast('Failed to mark message as read', 'error');
+            }
+        });
+    });
+
+    // Delete message
+    document.querySelectorAll('.delete-message').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            if (!confirm('Delete this message?')) return;
+
+            const messageId = this.dataset.messageId;
+            const messageCard = this.closest('.message-card');
+
+            try {
+                const response = await fetch(`/dashboard/messages/delete/${messageId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    messageCard.remove();
+                    showToast('Message deleted', 'success');
+
+                    // Show empty state if no messages left
+                    if (!document.querySelector('.message-card')) {
+                        location.reload();
+                    }
+                }
+            } catch (error) {
+                showToast('Failed to delete message', 'error');
+            }
+        });
+    });
+
+    // Reply to message
+    document.querySelectorAll('.reply-message').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const email = this.dataset.email;
+            const name = this.dataset.name;
+
+            document.getElementById('replyTo').value = email;
+            document.getElementById('replyName').textContent = name;
+            document.getElementById('replyModal').classList.remove('hidden');
+        });
+    });
+
+    // Send reply
+    document.getElementById('replyForm')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const to = document.getElementById('replyTo').value;
+        const subject = document.getElementById('replySubject').value;
+        const message = document.getElementById('replyMessage').value;
+        const sendBtn = document.getElementById('sendReply');
+
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+        try {
+            // In a real app, you'd send this to your backend
+            // For now, simulate sending
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            showToast('Reply sent successfully!', 'success');
+            closeModal('replyModal');
+            this.reset();
+        } catch (error) {
+            showToast('Failed to send reply', 'error');
+        } finally {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reply';
+        }
+    });
+
+    // View product
+    document.querySelectorAll('.view-product').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const productId = this.dataset.productId;
+            window.open(`/product/${productId}`, '_blank');
+        });
+    });
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+    }
+</script>
+{% endblock %}

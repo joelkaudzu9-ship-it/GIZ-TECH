@@ -1,0 +1,1098 @@
+{% extends "base/base.html" %}
+
+{% block title %}GIZ-tech - Premium Tech Products{% endblock %}
+
+{% block content %}
+<style>
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+/* ===== LOADING SPINNER ===== */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(10, 10, 10, 0.8);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-overlay.active {
+    display: flex;
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 3px solid rgba(37, 99, 235, 0.2);
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===== SKELETON LOADERS ===== */
+.skeleton {
+    background: linear-gradient(90deg, #1a1a2a 25%, #2a2a3a 50%, #1a1a2a 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 8px;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-card {
+    background: #1a1a2a;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.skeleton-image {
+    aspect-ratio: 1;
+    background: linear-gradient(90deg, #1a1a2a 25%, #2a2a3a 50%, #1a1a2a 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+}
+
+.skeleton-content {
+    padding: 1.5rem;
+}
+
+.skeleton-title {
+    height: 20px;
+    width: 80%;
+    margin-bottom: 0.75rem;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #1a1a2a 25%, #2a2a3a 50%, #1a1a2a 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+}
+
+.skeleton-text {
+    height: 14px;
+    width: 100%;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #1a1a2a 25%, #2a2a3a 50%, #1a1a2a 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+}
+
+.skeleton-text.short {
+    width: 60%;
+}
+
+.skeleton-price {
+    height: 24px;
+    width: 100px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #1a1a2a 25%, #2a2a3a 50%, #1a1a2a 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+}
+
+/* ===== BACK TO TOP BUTTON ===== */
+.back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+    text-decoration: none;
+}
+
+.back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.back-to-top:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+}
+
+.back-to-top i {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.back-to-top:hover i {
+    transform: translateY(-3px);
+}
+
+/* ===== HERO SECTION ===== */
+.hero-section {
+    min-height: 85vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0a0a0a 0%, #0f0f1a 50%, #0a0a0a 100%);
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 50%, rgba(37, 99, 235, 0.08) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.hero-section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.hero-content {
+    max-width: 900px;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+    animation: fadeInUp 0.8s ease;
+}
+
+.hero-title {
+    font-size: 4rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+    background: linear-gradient(135deg, #ffffff 0%, #a0a0ff 50%, #ffffff 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 3s ease infinite;
+}
+
+.text-accent {
+    background: linear-gradient(135deg, #2563eb, #3b82f6, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+    font-size: 1.3rem;
+    color: #c0c0c0;
+    margin-bottom: 2.5rem;
+    line-height: 1.6;
+    animation: fadeInUp 0.8s ease 0.1s both;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeInUp 0.8s ease 0.2s both;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: none;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    color: white;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+}
+
+.btn-outline {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(37, 99, 235, 0.5);
+    color: white;
+    backdrop-filter: blur(10px);
+}
+
+.btn-outline:hover {
+    background: rgba(37, 99, 235, 0.2);
+    border-color: #2563eb;
+    transform: translateY(-3px);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+/* ===== SECTIONS ===== */
+.featured-section,
+.latest-section,
+.features-section {
+    padding: 5rem 2rem;
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+    animation: fadeInUp 0.6s ease;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff, #a0a0a0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+    position: relative;
+    display: inline-block;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #2563eb, #3b82f6);
+    border-radius: 3px;
+    animation: scaleIn 0.6s ease;
+}
+
+.section-subtitle {
+    font-size: 1.1rem;
+    color: #a0a0a0;
+    margin-top: 1.5rem;
+}
+
+/* ===== PRODUCTS GRID ===== */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.product-card {
+    background: #1a1a2a;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    animation: fadeInUp 0.6s ease backwards;
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(37, 99, 235, 0.3);
+    box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5);
+}
+
+.product-card-image {
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: #0a0a0a;
+    position: relative;
+}
+
+.product-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card:hover .product-card-image img {
+    transform: scale(1.05);
+}
+
+.sold-overlay {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #ef4444;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    z-index: 2;
+    animation: scaleIn 0.3s ease;
+}
+
+.product-card-content {
+    padding: 1.5rem;
+}
+
+.product-card-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.5rem;
+    text-decoration: none;
+    display: block;
+    transition: color 0.3s ease;
+}
+
+.product-card-title:hover {
+    color: #2563eb;
+}
+
+.product-card-description {
+    font-size: 0.875rem;
+    color: #a0a0a0;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.product-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.product-card-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.product-card-views {
+    font-size: 0.8rem;
+    color: #a0a0a0;
+}
+
+.product-card-views i {
+    margin-right: 0.25rem;
+}
+
+/* ===== FEATURES GRID ===== */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.feature-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease backwards;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(37, 99, 235, 0.3);
+    box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5);
+}
+
+.feature-card:hover::before {
+    opacity: 1;
+}
+
+.feature-icon {
+    font-size: 3rem;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1.25rem;
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover .feature-icon {
+    transform: scale(1.1);
+}
+
+.feature-card h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.75rem;
+}
+
+.feature-card p {
+    color: #a0a0a0;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.section-footer {
+    text-align: center;
+    margin-top: 3rem;
+    animation: fadeInUp 0.6s ease;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 70vh;
+        padding: 5rem 1.5rem 3rem;
+    }
+
+    .hero-title {
+        font-size: 2.2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+        padding: 0 0.5rem;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .hero-actions .btn {
+        width: 100%;
+        max-width: 280px;
+        justify-content: center;
+        padding: 0.875rem 1.5rem;
+    }
+
+    .featured-section,
+    .latest-section,
+    .features-section {
+        padding: 3rem 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+    }
+
+    .section-subtitle {
+        font-size: 0.95rem;
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .feature-card {
+        padding: 1.5rem;
+    }
+
+    .feature-icon {
+        font-size: 2.5rem;
+    }
+
+    .feature-card h3 {
+        font-size: 1.2rem;
+    }
+
+    .back-to-top {
+        bottom: 1rem;
+        right: 1rem;
+        width: 45px;
+        height: 45px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 1.8rem;
+    }
+
+    .hero-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+    }
+
+    .btn {
+        font-size: 0.9rem;
+        padding: 0.75rem 1.5rem;
+    }
+}
+
+/* ===== NEWSLETTER SECTION ===== */
+.newsletter-section {
+    max-width: 600px;
+    margin: 4rem auto;
+    padding: 3rem;
+    background: linear-gradient(135deg, rgba(20,20,30,0.6), rgba(10,10,20,0.8));
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: center;
+}
+
+.newsletter-icon {
+    font-size: 3rem;
+    color: #2563eb;
+    margin-bottom: 1rem;
+}
+
+.newsletter-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.newsletter-text {
+    color: #a0a0a0;
+    margin-bottom: 2rem;
+}
+
+.newsletter-form {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.newsletter-input-group {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+}
+
+.newsletter-input-group i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+}
+
+.newsletter-input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50px;
+    color: white;
+    font-size: 1rem;
+}
+
+.newsletter-input:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+.newsletter-btn {
+    padding: 1rem 2rem;
+    white-space: nowrap;
+}
+
+.newsletter-message {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .newsletter-section {
+        margin: 2rem 1rem;
+        padding: 2rem;
+    }
+
+    .newsletter-form {
+        flex-direction: column;
+    }
+
+    .newsletter-input-group {
+        width: 100%;
+    }
+
+    .newsletter-btn {
+        width: 100%;
+    }
+}
+</style>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+</div>
+
+<!-- Back to Top Button -->
+<a href="#" class="back-to-top" id="backToTop">
+    <i class="fas fa-arrow-up"></i>
+</a>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-content">
+        <h1 class="hero-title">
+            Discover <span class="text-accent">Premium</span> Tech
+        </h1>
+        <p class="hero-subtitle">
+            Curated selection of high-quality gadgets and electronics for tech enthusiasts
+        </p>
+        <div class="hero-actions">
+            <a href="{{ url_for('main.products') }}" class="btn btn-primary" id="browseBtn">
+                Browse Products
+                <i class="fas fa-arrow-right"></i>
+            </a>
+            <a href="https://wa.me/{{ business.whatsapp if business else '265983142415' }}" class="btn btn-outline" target="_blank">
+                <i class="fab fa-whatsapp"></i>
+                Chat on WhatsApp
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products Section with Skeleton -->
+<section class="featured-section" id="featuredSection">
+    <div class="section-header">
+        <h2 class="section-title">Featured Products</h2>
+        <p class="section-subtitle">Hand-picked items you might love</p>
+    </div>
+    <div id="featuredProductsContainer">
+        <!-- Skeleton Loaders -->
+        <div class="products-grid" id="featuredSkeleton">
+            {% for i in range(4) %}
+            <div class="skeleton-card">
+                <div class="skeleton-image"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-title"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text short"></div>
+                    <div class="skeleton-price" style="margin-top: 0.75rem;"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <!-- Actual Products -->
+        <div id="featuredProducts" class="products-grid" style="display: none;">
+            {% if featured_products %}
+                {% for product in featured_products %}
+                <div class="product-card" data-product-id="{{ product.id }}">
+                    <div class="product-card-image">
+                        <img src="{{ product.thumbnail or (product.image_list[0] if product.image_list else url_for('static', filename='images/placeholder.jpg')) }}"
+                             alt="{{ product.title }}"
+                             loading="lazy">
+                        {% if product.is_sold %}
+                        <div class="sold-overlay">SOLD</div>
+                        {% endif %}
+                    </div>
+                    <div class="product-card-content">
+                        <a href="{{ url_for('main.product_detail', slug=product.slug or product.id) }}" class="product-card-title">
+                            {{ product.title }}
+                        </a>
+                        <p class="product-card-description">{{ product.description|truncate(80) }}</p>
+                        <div class="product-card-footer">
+                            <span class="product-card-price">MWK {{ "{:,.0f}".format(product.price) }}</span>
+                            <span class="product-card-views"><i class="fas fa-eye"></i> {{ product.views }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Latest Products Section with Skeleton -->
+<section class="latest-section" id="latestSection">
+    <div class="section-header">
+        <h2 class="section-title">Latest Arrivals</h2>
+        <p class="section-subtitle">Fresh from the collection</p>
+    </div>
+    <div id="latestProductsContainer">
+        <!-- Skeleton Loaders -->
+        <div class="products-grid" id="latestSkeleton">
+            {% for i in range(4) %}
+            <div class="skeleton-card">
+                <div class="skeleton-image"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-title"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text short"></div>
+                    <div class="skeleton-price" style="margin-top: 0.75rem;"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <!-- Actual Products -->
+        <div id="latestProducts" class="products-grid" style="display: none;">
+            {% if products %}
+                {% for product in products[:8] %}
+                <div class="product-card" data-product-id="{{ product.id }}">
+                    <div class="product-card-image">
+                        <img src="{{ product.thumbnail or (product.image_list[0] if product.image_list else url_for('static', filename='images/placeholder.jpg')) }}"
+                             alt="{{ product.title }}"
+                             loading="lazy">
+                        {% if product.is_sold %}
+                        <div class="sold-overlay">SOLD</div>
+                        {% endif %}
+                    </div>
+                    <div class="product-card-content">
+                        <a href="{{ url_for('main.product_detail', slug=product.slug or product.id) }}" class="product-card-title">
+                            {{ product.title }}
+                        </a>
+                        <p class="product-card-description">{{ product.description|truncate(80) }}</p>
+                        <div class="product-card-footer">
+                            <span class="product-card-price">MWK {{ "{:,.0f}".format(product.price) }}</span>
+                            <span class="product-card-views"><i class="fas fa-eye"></i> {{ product.views }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+    {% if products|length > 8 %}
+    <div class="section-footer">
+        <a href="{{ url_for('main.products') }}" class="btn btn-secondary">
+            View All Products
+            <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="section-header">
+        <h2 class="section-title">Why Choose GIZ-tech</h2>
+        <p class="section-subtitle">We make tech shopping simple and secure</p>
+    </div>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+            <h3>Quality Assured</h3>
+            <p>Every product is verified and tested for quality</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-whatsapp"></i></div>
+            <h3>Instant Contact</h3>
+            <p>Connect directly via WhatsApp for quick responses</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-truck"></i></div>
+            <h3>Secure Delivery</h3>
+            <p>Safe and tracked delivery across Malawi</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-undo-alt"></i></div>
+            <h3>Satisfaction Guaranteed</h3>
+            <p>7-day return policy on all items</p>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="newsletter-section">
+    <div class="newsletter-container">
+        <div class="newsletter-icon">
+            <i class="fas fa-envelope-open-text"></i>
+        </div>
+        <h2 class="newsletter-title">Stay Updated</h2>
+        <p class="newsletter-text">Get notified about new arrivals and special offers</p>
+        <form id="newsletterForm" class="newsletter-form" onsubmit="return handleSubscribe(event)">
+            <div class="newsletter-input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email"
+                       id="newsletterEmail"
+                       placeholder="Your email address"
+                       class="newsletter-input"
+                       required>
+            </div>
+            <button type="submit" class="btn btn-primary newsletter-btn" id="subscribeBtn">
+                Subscribe
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </form>
+        <p id="newsletterMessage" class="newsletter-message"></p>
+    </div>
+</section>
+
+<script>
+async function handleSubscribe(event) {
+    event.preventDefault();
+
+    const email = document.getElementById('newsletterEmail').value;
+    const btn = document.getElementById('subscribeBtn');
+    const messageEl = document.getElementById('newsletterMessage');
+
+    console.log('Subscribing email:', email);
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subscribing...';
+    messageEl.style.display = 'none';
+
+    try {
+        const response = await fetch('/subscribe', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: email })
+        });
+
+        const data = await response.json();
+        console.log('Response:', data);
+
+        messageEl.style.display = 'block';
+        messageEl.style.color = data.success ? '#10b981' : '#ef4444';
+        messageEl.textContent = data.message;
+
+        if (data.success) {
+            document.getElementById('newsletterEmail').value = '';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        messageEl.style.display = 'block';
+        messageEl.style.color = '#ef4444';
+        messageEl.textContent = 'An error occurred. Please try again.';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Subscribe <i class="fas fa-paper-plane"></i>';
+
+        setTimeout(() => {
+            messageEl.style.display = 'none';
+        }, 5000);
+    }
+
+    return false;
+}
+
+// Simulate loading to show skeleton
+document.addEventListener('DOMContentLoaded', function() {
+    // Show skeleton for 500ms then show actual content
+    setTimeout(function() {
+        const featuredSkeleton = document.getElementById('featuredSkeleton');
+        const featuredProducts = document.getElementById('featuredProducts');
+        const latestSkeleton = document.getElementById('latestSkeleton');
+        const latestProducts = document.getElementById('latestProducts');
+
+        if (featuredSkeleton) featuredSkeleton.style.display = 'none';
+        if (featuredProducts) featuredProducts.style.display = 'grid';
+        if (latestSkeleton) latestSkeleton.style.display = 'none';
+        if (latestProducts) latestProducts.style.display = 'grid';
+    }, 500);
+
+    // Add animation delays to product cards
+    const productCards = document.querySelectorAll('.product-card');
+    productCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.05}s`;
+    });
+
+    // Add animation delays to feature cards
+    const featureCards = document.querySelectorAll('.feature-card');
+    featureCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
+
+    // FORCE FIX: Make feature cards visible
+    setTimeout(function() {
+        const featureCards = document.querySelectorAll('.feature-card');
+        featureCards.forEach(card => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        });
+    }, 100);
+
+    // Also make sure any cards that were observed become visible
+    const cards = document.querySelectorAll('.product-card, .feature-card');
+    cards.forEach(card => {
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+    });
+});
+
+// Show loading overlay on navigation
+document.getElementById('browseBtn')?.addEventListener('click', function(e) {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.classList.add('active');
+    }
+});
+
+// Hide loading overlay when page loads
+window.addEventListener('load', function() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        setTimeout(() => {
+            overlay.classList.remove('active');
+        }, 300);
+    }
+});
+
+// Intersection Observer for scroll animations
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+            observer.unobserve(entry.target);
+        }
+    });
+}, observerOptions);
+
+// Observe product cards that are not yet animated
+document.querySelectorAll('.product-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(30px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+});
+
+// Back to Top Button
+const backToTop = document.getElementById('backToTop');
+if (backToTop) {
+    window.addEventListener('scroll', function() {
+        if (window.scrollY > 300) {
+            backToTop.classList.add('show');
+        } else {
+            backToTop.classList.remove('show');
+        }
+    });
+
+    backToTop.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+}
+</script>
+{% endblock %}

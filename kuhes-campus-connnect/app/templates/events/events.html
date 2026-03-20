@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Header -->
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h4 class="fw-bold mb-0"><i class="fas fa-calendar-alt me-2 text-primary"></i>Events</h4>
+</div>
+
+<!-- View Toggle -->
+<div class="d-flex bg-light rounded-pill p-1 mb-4">
+    <a href="{{ url_for('events.index', view='list') }}"
+       class="flex-fill text-center py-2 rounded-pill text-decoration-none {% if view == 'list' %}bg-primary text-white{% else %}text-secondary{% endif %}"
+       style="transition: all 0.2s;">
+        <i class="fas fa-list me-1"></i>List
+    </a>
+    <a href="{{ url_for('events.calendar') }}"
+       class="flex-fill text-center py-2 rounded-pill text-decoration-none {% if view == 'calendar' %}bg-primary text-white{% else %}text-secondary{% endif %}"
+       style="transition: all 0.2s;">
+        <i class="fas fa-calendar-week me-1"></i>Calendar
+    </a>
+</div>
+
+<!-- Featured Events -->
+{% if featured %}
+<h5 class="fw-bold mb-3">🌟 Featured Events</h5>
+<div class="horizontal-scroll mb-4">
+    <div class="d-flex gap-3 overflow-auto pb-2" style="-webkit-overflow-scrolling: touch;">
+        {% for event in featured %}
+        <div class="card" style="min-width: 250px; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <div class="card-body p-3">
+                <span class="badge bg-primary mb-2">{{ event.event_type|replace('_', ' ')|title }}</span>
+                <h6 class="fw-bold mb-1">{{ event.title|truncate(30) }}</h6>
+                <p class="small text-secondary mb-2">
+                    <i class="far fa-calendar me-1"></i>{{ event.start_date.strftime('%b %d') }}
+                    {% if event.end_date %} - {{ event.end_date.strftime('%b %d') }}{% endif %}
+                </p>
+                <p class="small text-secondary mb-2">
+                    <i class="fas fa-map-marker-alt me-1"></i>{{ event.venue|truncate(20) }}
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <!-- FIXED: Added parentheses to call the method -->
+                    <span class="small"><i class="fas fa-users me-1"></i>{{ event.attendee_count() }} going</span>
+                    <a href="{{ url_for('events.view', id=event.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Upcoming Events -->
+<h5 class="fw-bold mb-3">📅 Upcoming Events</h5>
+
+{% if upcoming %}
+    {% for event in upcoming %}
+    <div class="post-card" onclick="window.location.href='{{ url_for('events.view', id=event.id) }}'" style="cursor: pointer;">
+        <div class="d-flex gap-3">
+            <!-- Date Badge -->
+            <div class="text-center" style="min-width: 60px;">
+                <div class="bg-primary text-white rounded-3 py-2 px-1">
+                    <div class="small">{{ event.start_date.strftime('%b') }}</div>
+                    <div class="fw-bold fs-5">{{ event.start_date.strftime('%d') }}</div>
+                </div>
+            </div>
+
+            <!-- Event Info -->
+            <div class="flex-grow-1">
+                <div>
+                    <span class="badge bg-light text-dark mb-1">{{ event.event_type|replace('_', ' ')|title }}</span>
+                    <h6 class="fw-bold mb-1">{{ event.title }}</h6>
+                    <p class="small text-secondary mb-1">
+                        <i class="fas fa-map-marker-alt me-1"></i>{{ event.venue }}
+                        {% if event.room %} ({{ event.room }}){% endif %}
+                    </p>
+                    <p class="small text-secondary mb-1">
+                        <i class="far fa-clock me-1"></i>{{ event.start_date.strftime('%I:%M %p') }}
+                        {% if event.end_date %} - {{ event.end_date.strftime('%I:%M %p') }}{% endif %}
+                    </p>
+                </div>
+
+                <!-- Event Stats -->
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <!-- FIXED: Added parentheses to call the method -->
+                    <span class="small"><i class="fas fa-users text-primary me-1"></i>{{ event.attendee_count() }} going</span>
+                    {% if event.max_attendees %}
+                    <span class="small text-success"><i class="fas fa-user-plus me-1"></i>{{ event.max_attendees - event.attendee_count() }} spots</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+<!-- Empty State -->
+<div class="empty-state">
+    <i class="far fa-calendar-times fa-4x text-secondary mb-3"></i>
+    <h4>No upcoming events</h4>
+    <p class="text-secondary mb-4">Check back later or create a new event!</p>
+</div>
+{% endif %}
+
+<!-- Single Create Button (Bottom) -->
+<div class="fixed-bottom-btn-container" style="position: fixed; bottom: 80px; left: 0; right: 0; pointer-events: none; z-index: 999;">
+    <div class="container" style="pointer-events: auto;">
+        <div class="d-flex justify-content-center">
+            <a href="{{ url_for('events.create') }}" class="btn btn-primary btn-lg rounded-pill px-5 shadow-lg"
+               style="background: linear-gradient(135deg, #0056b3, #003d7a); border: none; box-shadow: 0 4px 15px rgba(0,86,179,0.4);">
+                <i class="fas fa-plus-circle me-2"></i>Create New Event
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.horizontal-scroll {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.horizontal-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.fixed-bottom-btn-container {
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .fixed-bottom-btn-container {
+        bottom: 90px;
+    }
+
+    .fixed-bottom-btn-container .btn {
+        width: 90%;
+        font-size: 14px;
+        padding: 12px 20px;
+    }
+}
+</style>
+{% endblock %}

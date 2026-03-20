@@ -1,0 +1,20 @@
+<!-- app/templates/components/ui/toast.html -->
+<div class="toast toast-{{ category }} animate-slide-up" role="alert">
+    <div class="toast-icon">
+        {% if category == 'success' %}
+        <i class="fas fa-check-circle"></i>
+        {% elif category == 'error' %}
+        <i class="fas fa-exclamation-circle"></i>
+        {% elif category == 'warning' %}
+        <i class="fas fa-exclamation-triangle"></i>
+        {% else %}
+        <i class="fas fa-info-circle"></i>
+        {% endif %}
+    </div>
+    <div class="toast-content">
+        {{ message }}
+    </div>
+    <button class="toast-close" onclick="this.parentElement.remove()">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
